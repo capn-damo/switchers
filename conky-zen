@@ -18,6 +18,11 @@
 #
 #   To stop a conky just uncheck it, and "OK"
 #
+#   Running conkys are saved to a session file, and can be run with
+#   the "conky-session-start" script. To start them at login, add the 
+#   following line to autostart:
+#                    (sleep 2s && conky-session-start) &
+#
 ########################################################################
 
 CONKYPATH=".conky"
