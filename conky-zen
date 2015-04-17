@@ -29,9 +29,6 @@ CONKYPATH=".conky"
 TEMPFILE="tmp/conky-tmp"
 SESSIONFILE="$CONKYPATH/conky-session.txt"
 
-# Create new session file
-> $SESSIONFILE
-
 conkyRunning(){
     > $TEMPFILE #make blank tempfile
     if [ "$(pidof conky)" ];then
@@ -87,7 +84,9 @@ RET=`zenity --list --title "BunsenLabs Conky" --checklist --width=300 --height=5
 
 if [[ $? == 1 ]]; then # cancel button pressed
     exit 0
-else    # loop through returned choices, add to array
+else
+    > $SESSIONFILE    # Create new session file
+    # loop through returned choices, add to array
     i=0
     IFS=":"     # separator is ":" in returned choices
     for name in $RET; do 
