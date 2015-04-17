@@ -1,15 +1,15 @@
 #!/bin/bash
 #
-#   Conky selection and switcher script
+#   BunsenLabs Conky selection and switcher script
 #
-#   Written by <damo> for BunsenLabs Linux, April 2015 
-#
-#   GNU GENERAL PUBLIC LICENSE Version 2, June 1991
+#   Written by <damo>, April 2015 
+#   Beta tested and stamped "zen" by <Sector11>
 #
 ########################################################################
 #
 #   Conkys must be in $CONKYPATH
-#   The name must end in "conky" or "conkyrc"
+#   The name must end with an extension of ".conky" or ".conkyrc"
+#   or just be plain ol' "conkyrc"
 #
 #   When the dialog opens, any running conkys will be checkmarked.
 #
@@ -26,13 +26,13 @@
 ########################################################################
 
 CONKYPATH=".conky"
-TEMPFILE="tmp/conky-tmp"
+TEMPFILE="$CONKYPATH/conky-tmp"
 SESSIONFILE="$CONKYPATH/conky-session.txt"
 
 conkyRunning(){
     > $TEMPFILE #make blank tempfile
     if [ "$(pidof conky)" ];then
-        ps aux | grep [c]onkyrc |  awk  '{print $2" "$NF}' >> tmp/conky-tmp
+        ps aux | grep [c]onkyrc |  awk  '{print $2" "$NF}' >> $TEMPFILE
     fi
 }
 
@@ -48,25 +48,26 @@ fillArrays(){
 }
 
 findConky(){
-# search dirs for conkys files - looking for .conky or (.)conkyrc in the name
+# search dirs for conkys files - looking for "conky" in the name
 # if "*.conky(rc)" then display it
-# if just "conkyrc" then it is the only one in the dir, so display the 
-# containing dir so the name is more descriptive
+# if "/conkyrc" display the containing dir so the name is more descriptive
 
 num=0
-for x in `find $CONKYPATH -type f`
-    do
-        if [[ $x = *conkyrc* ]] || [[ $x = *.conky ]];then
-            CONKY=$(echo $x | awk -F'/' '{print $NF}')
-            if [[ $CONKY = conkyrc ]];then
-                CONKY=$(echo $x | awk -F'/' '{print $(NF-1)}')
-            fi
-            fillArrays $num $x $CONKY
-            num=$(($num+1)) 
+# find files in CONKYPATH with conky in the name
+for x in $(find .conky -type f -iname "*conky*");do 
+    f=$(basename $x)
+    if [[ $f = *conkyrc ]] || [[ $f = *conky ]];then
+#       filename ends with *conky or *conkyrc
+        CONKY=$f
+        if [[ $f = conkyrc ]];then # file is called conkyrc
+            # get containing directory for descriptive name
+            CONKY=$(echo $x | awk -F'/' '{print $(NF-1)}')
         fi
-    done
+        fillArrays $num $x $CONKY
+        num=$(($num+1)) 
+    fi
+done
 }
-
 # get conky directories in .conky, add to array
 conkyRunning
 findConky
@@ -124,10 +125,10 @@ else
         done
     done 
 fi
-# I left this in for debugging. It could be changed to "rm -r $TEMPFILE"
-conkyRunning    # update tempfile
 
-exit
+rm -r $TEMPFILE
+
+exit 0
 
 
 
