@@ -1,0 +1,12 @@
+#!/bin/bash
+##
+SESSIONFILE=".conky/conky-session.txt"
+
+if [ -e "$SESSIONFILE" ];then
+   source $SESSIONFILE
+else
+    echo $"ERROR: $SESSIONFILE not found" >&2
+    exit 1
+fi
+
+exit
