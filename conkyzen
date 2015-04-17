@@ -56,7 +56,7 @@ findConky(){
 num=0
 for x in `find $CONKYPATH -type f`
     do
-        if [[ $x = *conkyrc ]] || [[ $x = *.conky ]];then
+        if [[ $x = *conkyrc* ]] || [[ $x = *.conky ]];then
             CONKY=$(echo $x | awk -F'/' '{print $NF}')
             if [[ $CONKY = conkyrc ]];then
                 CONKY=$(echo $x | awk -F'/' '{print $(NF-1)}')
