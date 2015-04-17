@@ -22,6 +22,10 @@
 
 CONKYPATH=".conky"
 TEMPFILE="tmp/conky-tmp"
+SESSIONFILE="$CONKYPATH/conky-session.txt"
+
+# Create new session file
+> $SESSIONFILE
 
 conkyRunning(){
     > $TEMPFILE #make blank tempfile
@@ -76,7 +80,7 @@ RET=`zenity --list --title "BunsenLabs Conky" --checklist --width=300 --height=5
     --column "Select" --column "Conky Name" --separator=":"\
     $msg`
 
-if [[ $? -eq 1 ]]; then # cancel button pressed
+if [[ $? == 1 ]]; then # cancel button pressed
     exit 0
 else    # loop through returned choices, add to array
     i=0
@@ -101,11 +105,13 @@ else    # loop through returned choices, add to array
                 # see if it matches the returned name
                 if [[ $conkyname == $name ]];then # it isn't just "conkyrc"
                     fpath="$conkypath/$conkyname"
+                    echo -e "conky -c $fpath & sleep 1s" >> $SESSIONFILE
                     conky -c "$fpath" & #start the conky
 #                    sleep 0.5s
                 elif [[ $conkyname == "conkyrc" ]];then
                     if [[ $DIR == $name ]];then # the containing dir was used as a descriptive name
                         fpath="$conkypath/$conkyname"
+                        echo -e "conky -c $fpath & sleep 1s" >> $SESSIONFILE
                         conky -c "$fpath" & #start the conky
 #                        sleep 0.5s
                     fi
