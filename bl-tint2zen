@@ -1,0 +1,138 @@
+#!/bin/bash
+#
+#   BunsenLabs tint2 selection and switcher script
+#
+#   Written by <damo>, April 2015 
+#
+########################################################################
+#
+#   Tint2 config files must be in $TINT2PATH
+#
+#   When the dialog opens, any running tint2s will be checkmarked.
+#
+#   Click "OK" and all running tint2s are stopped, and all checkmarked
+#   tint2s are started
+#
+#   To stop a tint2 just uncheck it, and "OK"
+#
+#   Running tint2s are saved to a session file, and can be run with
+#   the "tint2-session" script. To start them at login, add the 
+#   following line to autostart:
+#                    (sleep 2s && tint2-session) &
+#
+########################################################################
+
+TINT2PATH="$HOME/.config/tint2"
+TEMPFILE="$TINT2PATH/tint2-tmp"
+SESSIONFILE="$TINT2PATH/tint2-session.txt"
+
+tintRunning(){
+    > $TEMPFILE #make blank tempfile
+    if [ "$(pidof tint2)" ];then
+        running=$(ps aux | grep [t]int2 |  awk '{print $NF}')
+        echo "running= $running"
+        for field in $running;do
+            if ! [[ $field = $0 ]];then
+                echo $field >> $TEMPFILE
+            fi
+        done
+    fi
+}
+
+fillArrays(){
+    num="$1"
+    tintsPath[$num]="$2"   # full filepath to tint2
+    tintsArr[$num]="$3"    # displayed name
+    # see if name matches one of the running tints
+    while read line; do
+        line=$(basename $line)
+        echo "name= $3"
+        echo "line= $line"
+        if [[ $3 = $line ]];then
+            checkArr[$num]="TRUE" # match, so break out of loop
+            break
+        else
+            checkArr[$num]="FALSE"
+        fi
+    done < "$TEMPFILE"
+}
+
+findTint(){
+# search dirs for tint2 config files
+    num=0
+    for x in $(find $TINT2PATH -type f );do
+    echo "x= $x"
+        f=$(basename $x)
+        echo "f= $f"
+        if ! [[ $x = $SESSIONFILE ]];then
+            if  ! [[ $x = $TEMPFILE ]];then
+                fillArrays $num $x $f
+                num=$(($num+1))
+            fi
+        fi
+    done
+}
+# get tint2 directories in .tint2, add to array
+tintRunning
+findTint
+
+# loop through arrays, and build msg text for zenity dialog
+msg=""
+for ((j=0; j<${#tintsArr[*]}; j++));do
+    msg="$msg ${checkArr[j]} ${tintsArr[j]}"
+done
+
+## Populate zenity dialog from array, get return value(s)
+RET=`zenity --list --title "BunsenLabs Tint2 chooser" --checklist --width=300 --height=500 \
+    --column "Select" --column "tint2 Name" --separator=":"\
+    $msg`
+
+if [[ $? == 1 ]]; then # cancel button pressed
+    exit 0
+else
+    > $SESSIONFILE    # Create new session file
+    # loop through returned choices, add to array
+    i=0
+    IFS=":"     # separator is ":" in returned choices
+    for name in $RET; do 
+        retTint[$i]=$name
+        i=$(($i+1))
+    done
+    unset IFS;
+    
+    # kill all tint2s
+    if [ "$(pidof tint2)" ];then
+        killall tint2
+    fi
+    
+    for name in ${retTint[*]};do       # loop through checkmarked tint2 names
+        for ((j=0; j<${#tintsPath[*]}; j++));do  # traverse through elements
+            for f in ${tintsPath[j]};do
+                tintname=`basename $f`     # tint filename
+                tintpath=`dirname $f`      # tint filepath
+                DIR=`echo $f | awk -F"/" '{print $(NF-1)}'` # get directory containing the tint2
+                # see if it matches the returned name
+                if [[ $tintname == $name ]];then # it isn't just "tint2rc"
+                    fpath="$tintpath/$tintname"
+                    echo -e "tint2 -c $fpath & sleep 1s" >> $SESSIONFILE
+                    tint2 -c "$fpath" & #start the tint2
+#                    sleep 0.5s
+                elif [[ $tintname == "tint2rc" ]];then
+                    if [[ $DIR == $name ]];then # the containing dir was used as a descriptive name
+                        fpath="$tintpath/$tintname"
+                        echo -e "tint2 -c $fpath & sleep 1s" >> $SESSIONFILE
+                        tint2 -c "$fpath" & #start the tint
+#                        sleep 0.5s
+                    fi
+                fi
+            done
+        done
+    done 
+fi
+
+#rm -r $TEMPFILE
+tintRunning
+exit 0
+
+
+

@@ -1,0 +1,18 @@
+#!/bin/bash
+##
+#   Read a saved BunsenLabs tint2 session file and start the tint2s
+#
+#   written by <damo> for BunsenLabs, April 2015
+#
+########################################################################
+TINT2PATH="$HOME/.config/tint2"
+SESSIONFILE="$TINT2PATH/tint2-session.txt"
+
+if [ -e "$SESSIONFILE" ];then
+   source $SESSIONFILE
+else
+    echo $"ERROR: $SESSIONFILE not found" >&2
+    exit 1
+fi
+
+exit 0
