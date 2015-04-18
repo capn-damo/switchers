@@ -1,6 +1,12 @@
 #!/bin/bash
 ##
-SESSIONFILE=".conky/conky-session.txt"
+#   Read a saved BunsenLabs Conky session file and start the conkys
+#
+#   written by <damo> for BunsenLabs, April 2015
+#
+########################################################################
+CONKYPATH=".conky"
+SESSIONFILE="$CONKYPATH/conky-session.txt"
 
 if [ -e "$SESSIONFILE" ];then
    source $SESSIONFILE
