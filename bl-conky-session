@@ -5,8 +5,20 @@
 #   written by <damo> for BunsenLabs, April 2015
 #
 ########################################################################
-CONKYPATH=".conky"
-SESSIONFILE="$CONKYPATH/conky-session.txt"
+CONKYPATH="$HOME/.conky"
+
+if [ $# -eq 0 ];then
+    SESSIONFILE="$CONKYPATH/conky-session.txt"
+elif [[ $1 = "-h" ]] || [[ $1 = "--help" ]];then
+    echo "  USAGE: with no command argument, the script uses the default"
+    echo "  conky session file '$CONKYPATH/conky-session.txt'"
+    echo
+    echo "  To run other session files use 'bl-conky-session /path/to/file'"
+    echo
+    exit 0
+else
+    SESSIONFILE="$1"
+fi
 
 if [ -e "$SESSIONFILE" ];then
    source $SESSIONFILE
@@ -15,4 +27,4 @@ else
     exit 1
 fi
 
-exit
+exit 0

@@ -6,7 +6,19 @@
 #
 ########################################################################
 TINT2PATH="$HOME/.config/tint2"
-SESSIONFILE="$TINT2PATH/tint2-session.txt"
+
+if [ $# -eq 0 ];then
+    SESSIONFILE="$TINT2PATH/tint2-session.txt"
+elif [[ $1 = "-h" ]] || [[ $1 = "--help" ]];then
+    echo "  USAGE: with no command argument, the script uses the default"
+    echo "  Tint2 session file '$TINT2PATH/tint2-session.txt'"
+    echo
+    echo "  To run other session files use 'bl-tint2-session /path/to/file'"
+    echo
+    exit 0
+else
+    SESSIONFILE="$1"
+fi
 
 if [ -e "$SESSIONFILE" ];then
    source $SESSIONFILE
