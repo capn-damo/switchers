@@ -33,7 +33,7 @@ SESSIONFILE="$CONKYPATH/conky-session.txt"
 conkyRunning(){    # find running conkys
     > $TEMPFILE # make blank tempfile, to save running conky paths
     if [ "$(pidof conky)" ];then
-        ps aux | grep "[c]onky -c" |  awk  '{print $NF}' >> $TEMPFILE
+        ps aux | grep [c]onky" -c" |  awk  '{print $NF}' >> $TEMPFILE
     fi
 }
 
@@ -41,7 +41,7 @@ fillArrays(){
     num="$1"
     conkysPath[$num]="$2"   # full filepath to conky
     conkysArr[$num]="$3"    # displayed name: "directory/*conky(rc)" 
-    if grep -q "$2" "$TEMPFILE";then # if conky is running (read from tempfile)
+    if grep -qx "$2" "$TEMPFILE";then # if conky is running (read from tempfile)
         checkArr[$num]="TRUE"       # make checkmark in dialog
     else
         checkArr[$num]="FALSE"
