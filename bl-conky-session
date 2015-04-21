@@ -6,7 +6,7 @@
 #
 ########################################################################
 CONKYPATH="$HOME/.conky"
-SESSIONFILE="$CONKYPATH/conky-session.txt"
+SESSIONFILE="$CONKYPATH/conky-session"
 USAGE=$(echo -e "\v  USAGE: with no command argument, the script uses the default"
     echo -e "\t conky session file '$SESSIONFILE'\v"
     echo -e "  To run other session files use:\v"
@@ -14,7 +14,11 @@ USAGE=$(echo -e "\v  USAGE: with no command argument, the script uses the defaul
     
 findArgs(){     # get command args (sessionfile paths)
     i=0
+
     for arg in "$@";do
+        if [[ $arg = "default" ]];then
+            arg="$SESSIONFILE"
+        fi
         if test -f  "$arg" &>/dev/null;then # sessionfile exists
             rawArr[$i]="$arg"       # add sessionfiles to array
             i=$(($i+1))
@@ -25,12 +29,24 @@ findArgs(){     # get command args (sessionfile paths)
     done
     # remove duplicate args
     sessArr=(`printf "%s\n" "${rawArr[@]}" | sort -u`)
+    killConkys
     for session in "${sessArr[@]}";do # run the conkys in the sessionfiles
         source "$session"
     done
 }
 
+killConkys(){
+    msg="Kill running conkys first?"
+    RET=$(zenity --question --text="$msg")
+    if [[ $? == 0 ]];then            # kill all conkys
+        if [ "$(pidof conky)" ];then
+            killall conky && sleep 0.2s
+        fi
+    fi
+}
+
 if [ $# -eq 0 ];then    # if no args, then run default sessionfile
+    killConkys
     source $SESSIONFILE
 elif [[ $1 = "-h" ]] || [[ $1 = "--help" ]];then
     echo "$USAGE"
