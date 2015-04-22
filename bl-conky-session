@@ -46,8 +46,8 @@ findArgs(){     # get command args (switches & sessionfile paths)
     if [[ $NOKILL == 0 ]];then
         killConkys
     fi
-    for session in "${sessArr[@]}";do # run the conkys in the sessionfiles
-        source "$session"
+    for SESSION in "${sessArr[@]}";do # run the conkys in the sessionfiles
+        source "$SESSION"
     done
 }
 
@@ -64,7 +64,7 @@ killConkys(){
 NOKILL=0
 if [ $# -eq 0 ];then    # if no args, then run default sessionfile
     killConkys
-    source $SESSIONFILE
+    source "$SESSIONFILE"
 elif [[ $1 = "-h" ]] || [[ $1 = "--help" ]];then
     echo "$USAGE"
     exit 0

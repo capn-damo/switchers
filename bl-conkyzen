@@ -36,9 +36,9 @@ SESSIONS="$CONKYPATH/saved-sessions"    # to be used by a pipemenu
 
 ########## FUNCTIONS ###################################################
 conkyRunning(){    # find running conkys
-    > $TEMPFILE # make blank tempfile, to save running conky paths
+    > "$TEMPFILE" # make blank tempfile, to save running conky paths
     if [ "$(pidof conky)" ];then
-        ps aux | grep [c]onky" -c" |  awk  '{print $NF}' >> $TEMPFILE
+        ps aux | grep [c]onky" -c" |  awk  '{print $NF}' >> "$TEMPFILE"
     fi
 }
 
@@ -59,20 +59,19 @@ findConky(){
 
 num=0
 # find files in CONKYPATH with conky in the name
-for x in $(find $CONKYPATH -type f );do 
-    f=$(basename $x)    # filename from filepath
+for x in $(find "$CONKYPATH" -type f );do 
+    f=$(basename "$x")    # filename from filepath
     if [[ $f = *conkyrc ]] || [[ $f = *conky ]];then
         # filename ends with *conky or *conkyrc
         # get directory/conkyname to display in list
-        CONKY=$( echo $x | awk -F"/" '{print $(NF-1)"/"$NF}')
-        fillArrays $num $x $CONKY
+        CONKY=$( echo "$x" | awk -F"/" '{print $(NF-1)"/"$NF}')
+        fillArrays $num "$x" "$CONKY"
         num=$(($num+1)) 
     fi
 done
 }
 
 writeSessions(){    # save a new sessionfile name for use by a menu
-#    fullpath=$(readlink -f "$1")    # ensure full filepath is used
     fullpath=$(readlink -f "$1")    # ensure full filepath is used
     SESSIONFILE="$fullpath"
     if ! [ -f "$SESSIONS" ];then
@@ -117,13 +116,13 @@ RET=$(zenity --list --text "BunsenLabs Conky Chooser\n\nSession will be saved to
 if [[ $? == 1 ]]; then # cancel button pressed
     exit 0
 else
-    > $SESSIONFILE    # Create new session file
+    > "$SESSIONFILE"    # Create new session file
     # loop through returned choices, add to array
     i=0
     OIFS=$IFS   # save Internal Field Separator
     IFS=":"     # separator is ":" in returned choices
     for name in $RET; do 
-        retConky[$i]=$name
+        retConky[$i]="$name"
         i=$(($i+1))
     done
     IFS=$OIFS   # reset IFS back to default
@@ -137,9 +136,9 @@ else
     for name in ${retConky[*]};do       # loop through checkmarked conky names
         for ((j=0; j<${#conkysPath[*]}; j++));do  # traverse through elements
             for f in ${conkysPath[j]};do    # compare with choice from dialog
-                display=$( echo $f | awk -F"/" '{print $(NF-1)"/"$NF}')
+                display=$( echo "$f" | awk -F"/" '{print $(NF-1)"/"$NF}')
                 if [[ $display = $name ]];then
-                    echo -e "conky -c $f & sleep 1s" >> $SESSIONFILE
+                    echo -e "conky -c $f & sleep 1s" >> "$SESSIONFILE"
                     #start the conky (adjust the sleep time if required)
                     conky -c "$f"; sleep 0.5s & 
                 fi
@@ -148,6 +147,6 @@ else
     done 
 fi
 
-rm -r $TEMPFILE
+rm -r "$TEMPFILE"
 
 exit 0

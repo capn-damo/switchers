@@ -16,6 +16,9 @@ USAGE=$(
 
 if [ $# -eq 0 ];then
     if test -f "$1";then
+        if [ "$(pidof tint2)" ];then    # kill running tint2s
+            killall tint2 && sleep 0.2s
+        fi
         source $SESSIONFILE
     else
         echo -e "\v\tERROR: SESSIONFILE \"$SESSIONFILE\" not found!" >&2
