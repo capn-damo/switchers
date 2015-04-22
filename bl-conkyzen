@@ -147,7 +147,7 @@ else
         done
     done 
 fi
-#writeSessions "$SESSIONFILE"    # if sessionfile is new, write name to saved-sessions
+
 rm -r $TEMPFILE
 
 exit 0
