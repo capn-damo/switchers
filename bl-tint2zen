@@ -23,32 +23,25 @@
 ########################################################################
 
 TINT2PATH="$HOME/.config/tint2"
-TEMPFILE="$TINT2PATH/tint2-tmp"
-SESSIONFILE="$TINT2PATH/tint2-session.txt"
+TEMPFILE="$TINT2PATH/tint2-temp"
+SESSIONFILE="$TINT2PATH/tint2-session"
 
 tintRunning(){
     > $TEMPFILE #make blank tempfile
     if [ "$(pidof tint2)" ];then
-        running=$(ps aux | grep [t]int2 |  awk '{print $NF}')
-        echo "running= $running"
-        for field in $running;do
-            if ! [[ $field = $0 ]];then
-                echo $field >> $TEMPFILE
-            fi
-        done
+        # get last field of output = tint2 filepath; write to tempfile
+        ps aux | grep [t]int2" -c" |  awk  '{print $NF}' >> $TEMPFILE
     fi
 }
 
 fillArrays(){
     num="$1"
-    tintsPath[$num]="$2"   # full filepath to tint2
+    tintsPath[$num]="$2"   # full filepath to the tint2
     tintsArr[$num]="$3"    # displayed name
     # see if name matches one of the running tints
     while read line; do
-        line=$(basename $line)
-        echo "name= $3"
-        echo "line= $line"
-        if [[ $3 = $line ]];then
+        f=$(echo $line | awk -F"/" '{print $(NF-1)"/"$NF}')
+        if [[ $3 = $f ]];then
             checkArr[$num]="TRUE" # match, so break out of loop
             break
         else
@@ -61,14 +54,12 @@ findTint(){
 # search dirs for tint2 config files
     num=0
     for x in $(find $TINT2PATH -type f );do
-    echo "x= $x"
-        f=$(basename $x)
-        echo "f= $f"
-        if ! [[ $x = $SESSIONFILE ]];then
-            if  ! [[ $x = $TEMPFILE ]];then
-                fillArrays $num $x $f
-                num=$(($num+1))
-            fi
+        # check if likely tint2 config file
+        pm=$(grep  "panel_monitor" "$x")
+        if [[ $pm ]];then
+            TINT2=$( echo $x | awk -F"/" '{print $(NF-1)"/"$NF}')
+            fillArrays $num $x $TINT2
+            num=$(($num+1))
         fi
     done
 }
@@ -93,12 +84,13 @@ else
     > $SESSIONFILE    # Create new session file
     # loop through returned choices, add to array
     i=0
+    OIFS=$IFS   # copy original IFS
     IFS=":"     # separator is ":" in returned choices
     for name in $RET; do 
         retTint[$i]=$name
         i=$(($i+1))
     done
-    unset IFS;
+    IFS=$IFS    # reset IFS
     
     # kill all tint2s
     if [ "$(pidof tint2)" ];then
@@ -106,32 +98,24 @@ else
     fi
     
     for name in ${retTint[*]};do       # loop through checkmarked tint2 names
+    echo "name= $name"
         for ((j=0; j<${#tintsPath[*]}; j++));do  # traverse through elements
             for f in ${tintsPath[j]};do
-                tintname=`basename $f`     # tint filename
-                tintpath=`dirname $f`      # tint filepath
-                DIR=`echo $f | awk -F"/" '{print $(NF-1)}'` # get directory containing the tint2
+                display=$( echo $f | awk -F"/" '{print $(NF-1)"/"$NF}')
                 # see if it matches the returned name
-                if [[ $tintname == $name ]];then # it isn't just "tint2rc"
-                    fpath="$tintpath/$tintname"
-                    echo -e "tint2 -c $fpath & sleep 1s" >> $SESSIONFILE
-                    tint2 -c "$fpath" & #start the tint2
-#                    sleep 0.5s
-                elif [[ $tintname == "tint2rc" ]];then
-                    if [[ $DIR == $name ]];then # the containing dir was used as a descriptive name
-                        fpath="$tintpath/$tintname"
-                        echo -e "tint2 -c $fpath & sleep 1s" >> $SESSIONFILE
-                        tint2 -c "$fpath" & #start the tint
-#                        sleep 0.5s
-                    fi
+                if [[ $display = $name ]];then
+                    fpath="$f"
+                    echo -e "tint2 -c $f & sleep 1s" >> $SESSIONFILE
+                    tint2 -c "$f" & #start the tint2
+                    sleep 0.5s
                 fi
             done
         done
     done 
 fi
 
-#rm -r $TEMPFILE
-tintRunning
+rm -r $TEMPFILE
+
 exit 0
 
 
