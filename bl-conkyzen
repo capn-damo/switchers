@@ -18,9 +18,10 @@
 #   To stop a conky just uncheck it, and "OK"
 #
 #   Running conkys are saved to a session file, and can be run with
-#   the "bl-conky-session" script. To start them at login, add the 
-#   following line to autostart:
-#                    (sleep 2s && bl-conky-session --autostart) &
+#   the "bl-conky-session" script. To start the default conky session at
+#   login, add the following line to autostart:
+#
+#     (sleep 2s && bl-conky-session --autostart) &
 #
 #   Different saved-session files can be used by running the script with:
 #
@@ -96,6 +97,7 @@ for arg in "$@";do
     esac
 done
 
+
 # get conky directories in .conky, add to array
 conkyRunning
 findConky
@@ -145,7 +147,7 @@ else
         done
     done 
 fi
-
+#writeSessions "$SESSIONFILE"    # if sessionfile is new, write name to saved-sessions
 rm -r $TEMPFILE
 
 exit 0
