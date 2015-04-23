@@ -1,8 +1,13 @@
 #!/bin/bash
 ##
-#   Read a saved BunsenLabs tint2 session file and start the tint2s
+#   Read a saved BunsenLabs Tint2 session file and start the tint2s
 #
 #   written by <damo> for BunsenLabs, April 2015
+#
+#   To start the default Tint2 session at login, add the following line
+#   to config/openbox/autostart:
+#
+#      (sleep 2s && bl-tint2-session --autostart) &
 #
 ########################################################################
 TINT2PATH="$HOME/.config/tint2"

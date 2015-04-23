@@ -4,6 +4,11 @@
 #
 #   written by <damo> for BunsenLabs, April 2015
 #
+#   To start the default conky session at login, add the following line
+#   to config/openbox/autostart:
+#
+#      (sleep 2s && bl-conky-session --autostart) &
+#
 ########################################################################
 CONKYPATH="$HOME/.conky"
 SESSIONFILE="$CONKYPATH/conky-sessionfile"

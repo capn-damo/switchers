@@ -18,7 +18,8 @@
 #   Running tint2s are saved to a session file, and can be run with
 #   the "tint2-session" script. To start them at login, add the 
 #   following line to autostart:
-#                    (sleep 2s && bl-tint2-session --autostart) &
+#
+#           (sleep 2s && bl-tint2-session --autostart) &
 #
 ########################################################################
 
