@@ -24,7 +24,6 @@ USAGE=$(echo -e "\vUSAGE:\tbl-conky-session [OPTION(S)]...FILES"
 
 findArgs(){     # get command args (switches & sessionfile paths)
     i=0
-
     for arg in "$@";do
         if [[ $arg = "--default" ]];then
             arg="$SESSIONFILE"
